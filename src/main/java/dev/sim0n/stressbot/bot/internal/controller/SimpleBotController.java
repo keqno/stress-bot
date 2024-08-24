@@ -49,7 +49,7 @@ public class SimpleBotController<Buf extends ByteBuf> implements BotController<B
 
             this.makeBot(connectAction, disconnectAction);
 
-            if (moveAfter != -1 && (i + 1) % moveAfter == 0) {
+            if (moveAfter == 0 || (moveAfter != -1 && (i + 1) % moveAfter == 0)) {
                 for (Bot repoBot : repo.getBots()) {
                     repoBot.setShouldMove(true);
                 }

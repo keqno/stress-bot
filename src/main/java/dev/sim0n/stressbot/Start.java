@@ -40,7 +40,7 @@ public class Start {
         OptionSpec<Integer> moveAfterSpec = optionParser
                 .acceptsAll(ImmutableList.of("MA", "moveafter"), "when should bots start moving")
                 .withOptionalArg()
-                .defaultsTo("-1")
+                .defaultsTo(String.valueOf(-1))
                 .ofType(Integer.class);
 
         OptionSpec<Integer> serverPortSpec = optionParser
