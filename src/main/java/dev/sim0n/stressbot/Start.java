@@ -32,10 +32,16 @@ public class Start {
                 .ofType(String.class);
 
         OptionSpec<String> usernamePrefixSpec = optionParser
-            .acceptsAll(ImmutableList.of("U", "username"), "the bot username prefix")
-            .withOptionalArg()
-            .defaultsTo("rowin")
-            .ofType(String.class);
+                .acceptsAll(ImmutableList.of("U", "username"), "the bot username prefix")
+                .withOptionalArg()
+                .defaultsTo("rowin")
+                .ofType(String.class);
+
+        OptionSpec<Integer> moveAfterSpec = optionParser
+                .acceptsAll(ImmutableList.of("MA", "moveafter"), "when should bots start moving")
+                .withOptionalArg()
+                .defaultsTo("-1")
+                .ofType(Integer.class);
 
         OptionSpec<Integer> serverPortSpec = optionParser
                 .acceptsAll(ImmutableList.of("P", "port"), "the server port")
@@ -52,6 +58,7 @@ public class Start {
 
             int loginDelay = 4000;
             int botCount = 25;
+            int moveAfter = -1;
 
             String address = "127.0.0.1";
             int port = 25565;
@@ -64,15 +71,19 @@ public class Start {
                 loginDelay = loginDelaySpec.value(options);
             }
 
-            if (options.has("A")){
+            if (options.has("A")) {
                 address = serverAddressSpec.value(options);
             }
 
-            if (options.has("P")){
+            if (options.has("P")) {
                 port = serverPortSpec.value(options);
             }
 
-            StressBot stressBot = new StressBot(address, port, botCount, loginDelay, usernamePrefixSpec.value(options));
+            if (options.has("MA")) {
+                moveAfter = moveAfterSpec.value(options);
+            }
+
+            StressBot stressBot = new StressBot(address, port, botCount, moveAfter, loginDelay, usernamePrefixSpec.value(options));
             stressBot.start();
         } catch (Exception e) {
             e.printStackTrace();

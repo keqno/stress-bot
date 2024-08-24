@@ -40,7 +40,7 @@ public class SimpleBotController<Buf extends ByteBuf> implements BotController<B
     private final String usernamePrefix;
 
     @Override
-    public void start(String address, int port, int botCount, long loginDelay) {
+    public void start(String address, int port, int botCount, int moveAfter, long loginDelay) {
         for (int i = 0; i < botCount; i++) {
             String name = this.usernamePrefix + "_" + i;
 
@@ -48,11 +48,23 @@ public class SimpleBotController<Buf extends ByteBuf> implements BotController<B
             Consumer<ChannelHandlerContext> disconnectAction = new DisconnectAction(name);
 
             this.makeBot(connectAction, disconnectAction);
+
+            if (moveAfter != -1 && (i + 1) % moveAfter == 0) {
+                for (Bot repoBot : repo.getBots()) {
+                    repoBot.setShouldMove(true);
+                }
+            }
+
             try {
                 Thread.sleep(loginDelay);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        // Make sure they're all moving
+        for (Bot bot : repo.getBots()) {
+            bot.setShouldMove(true);
         }
     }
 

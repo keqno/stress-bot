@@ -34,13 +34,15 @@ public class StressBot {
     private final String address;
     private final int port;
     private final int botCount;
+    private final int moveAfter;
     private final long loginDelay;
     private final String usernamePrefix;
 
-    public StressBot(String address, int port, int botCount, int loginDelay, String usernamePrefix) {
+    public StressBot(String address, int port, int botCount, int moveAfter, int loginDelay, String usernamePrefix) {
         this.address = address;
         this.port = port;
         this.botCount = botCount;
+        this.moveAfter = moveAfter;
         this.loginDelay = loginDelay;
         this.usernamePrefix = usernamePrefix;
 
@@ -64,14 +66,13 @@ public class StressBot {
 
     public void start() {
         System.out.println("Welcome to Stress Bot.");
-        System.out.println("Bot Count: " + botCount + ", Login Delay: " + loginDelay);
-        //System.out.println("Type \"help\" for a list of available commands.");
+        System.out.println("Bot Count: " + botCount + ", Login Delay: " + loginDelay + (moveAfter != -1 ? ", Move After: " + moveAfter : ""));
         System.out.println();
 
-        this.registerBots();
+        this.registerTickLoop();
         this.registerConsole();
         this.registerCommands();
-        this.registerTickLoop();
+        this.registerBots();
     }
 
     private void registerBots() {
@@ -81,7 +82,7 @@ public class StressBot {
                 .factory(SimpleBotFactory.INSTANCE)
                 .usernamePrefix(this.usernamePrefix);
 
-        this.botController.start(this.address, this.port, this.botCount, this.loginDelay);
+        this.botController.start(this.address, this.port, this.botCount, this.moveAfter, this.loginDelay);
     }
 
     private void registerCommands() {

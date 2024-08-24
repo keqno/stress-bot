@@ -1,6 +1,6 @@
 package dev.sim0n.stressbot.bot.internal;
 
-import dev.sim0n.stressbot.bot.*;
+import dev.sim0n.stressbot.bot.Bot;
 import dev.sim0n.stressbot.bot.internal.factory.task.SimpleTaskFactory;
 import dev.sim0n.stressbot.bot.internal.listener.login.EncryptionRequestListener;
 import dev.sim0n.stressbot.bot.internal.listener.login.LoginSuccessListener;
@@ -8,7 +8,11 @@ import dev.sim0n.stressbot.bot.internal.listener.login.SetCompressionListener;
 import dev.sim0n.stressbot.bot.internal.listener.play.ConfirmTransactionListener;
 import dev.sim0n.stressbot.bot.internal.listener.play.KeepAliveListener;
 import dev.sim0n.stressbot.bot.internal.listener.play.PosLookListener;
-import dev.sim0n.stressbot.packet.*;
+import dev.sim0n.stressbot.bot.task.Scheduler;
+import dev.sim0n.stressbot.packet.AbstractPacket;
+import dev.sim0n.stressbot.packet.PacketDirection;
+import dev.sim0n.stressbot.packet.PacketListener;
+import dev.sim0n.stressbot.packet.PacketRepository;
 import dev.sim0n.stressbot.packet.connection.ConnectionState;
 import dev.sim0n.stressbot.packet.internal.login.clientbound.SEncryptionRequest;
 import dev.sim0n.stressbot.packet.internal.login.clientbound.SLoginSuccess;
@@ -17,7 +21,6 @@ import dev.sim0n.stressbot.packet.internal.play.clientbound.SConfirmTransaction;
 import dev.sim0n.stressbot.packet.internal.play.clientbound.SKeepAlive;
 import dev.sim0n.stressbot.packet.internal.play.clientbound.SPosLook;
 import dev.sim0n.stressbot.packet.internal.play.serverbound.*;
-import dev.sim0n.stressbot.bot.task.Scheduler;
 import dev.sim0n.stressbot.util.NettyUtil;
 import dev.sim0n.stressbot.util.location.Location;
 import io.netty.channel.ChannelHandlerContext;
@@ -32,7 +35,8 @@ import java.util.function.Consumer;
  * @author sim0n
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-@Getter @Setter
+@Getter
+@Setter
 public class PlayerBot implements Bot {
     private final Map<Integer, PacketListener> listeners = new HashMap<>();
 
@@ -49,6 +53,7 @@ public class PlayerBot implements Bot {
 
     private int positionUpdateTicks;
     private int ticksExisted;
+    private boolean shouldMove;
 
     private double moveSpeed = 0.2;
 
@@ -87,7 +92,7 @@ public class PlayerBot implements Bot {
 
     @Override
     public void tick() {
-        if (this.context == null || this.connectionState != ConnectionState.PLAY)
+        if (this.context == null || this.connectionState != ConnectionState.PLAY || !shouldMove)
             return;
 
         ++this.ticksExisted;
@@ -95,19 +100,7 @@ public class PlayerBot implements Bot {
         this.scheduler.tick(this.ticksExisted, this.context, this);
 
         boolean shouldUpdatePosition = this.location.distance(this.lastLocation) > 0.03 || this.positionUpdateTicks >= 20;
-        boolean shouldUpdateRotation = this.location.getPitch() != this.lastLocation.getPitch() || this.location.getYaw() != this.lastLocation.getYaw();
-
-        Class<? extends CPlayer> clazz;
-
-        if (shouldUpdatePosition && shouldUpdateRotation) {
-            clazz = CPlayerPosLook.class;
-        } else if (shouldUpdatePosition) {
-            clazz = CPlayerPos.class;
-        } else if (shouldUpdateRotation) {
-            clazz = CPlayerLook.class;
-        } else {
-            clazz = CPlayer.class;
-        }
+        Class<? extends CPlayer> clazz = getPacketType(shouldUpdatePosition);
 
         ++this.positionUpdateTicks;
 
@@ -125,6 +118,23 @@ public class PlayerBot implements Bot {
 
             packet.setOnGround(location.isOnGround());
         });
+    }
+
+    private Class<? extends CPlayer> getPacketType(boolean shouldUpdatePosition) {
+        boolean shouldUpdateRotation = this.location.getPitch() != this.lastLocation.getPitch() || this.location.getYaw() != this.lastLocation.getYaw();
+
+        Class<? extends CPlayer> clazz;
+
+        if (shouldUpdatePosition && shouldUpdateRotation) {
+            clazz = CPlayerPosLook.class;
+        } else if (shouldUpdatePosition) {
+            clazz = CPlayerPos.class;
+        } else if (shouldUpdateRotation) {
+            clazz = CPlayerLook.class;
+        } else {
+            clazz = CPlayer.class;
+        }
+        return clazz;
     }
 
     @Override
@@ -147,6 +157,11 @@ public class PlayerBot implements Bot {
 
         this.location.update(x, y, z, yaw, pitch);
         this.location.setOnGround(onGround);
+    }
+
+    @Override
+    public void setShouldMove(boolean value) {
+        this.shouldMove = value;
     }
 
     @Override
