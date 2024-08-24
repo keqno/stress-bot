@@ -27,7 +27,7 @@ Option                       Description
 -H, -h, --help               displays a help menu
 -P, --port <Integer>         the server port
 -U, --username <String>      username prefix
--MA, --moveafter <Integer>   allow bots to move every x amount of joins
+-MA, --moveafter <Integer>   allow bots to move every x amount of joins (0 to make them move as soon as they join)
 ```
 
 ## Example Usage
