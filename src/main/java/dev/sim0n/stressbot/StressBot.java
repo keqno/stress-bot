@@ -1,5 +1,6 @@
 package dev.sim0n.stressbot;
 
+import dev.sim0n.stressbot.bot.Bot;
 import dev.sim0n.stressbot.bot.controller.BotController;
 import dev.sim0n.stressbot.bot.internal.controller.SimpleBotController;
 import dev.sim0n.stressbot.bot.internal.factory.SimpleBotFactory;
@@ -69,20 +70,28 @@ public class StressBot {
         System.out.println("Bot Count: " + botCount + ", Login Delay: " + loginDelay + (moveAfter != -1 ? ", Move After: " + moveAfter : ""));
         System.out.println();
 
+        this.registerBotController();
         this.registerTickLoop();
         this.registerConsole();
         this.registerCommands();
         this.registerBots();
     }
 
-    private void registerBots() {
+    public void registerBotController() {
         this.botController = SimpleBotController.builder()
                 .address(this.address)
                 .port(this.port)
                 .factory(SimpleBotFactory.INSTANCE)
                 .usernamePrefix(this.usernamePrefix);
+    }
 
+    public void registerBots() {
         this.botController.start(this.address, this.port, this.botCount, this.moveAfter, this.loginDelay);
+
+        // Make sure they're all moving
+        for (Bot bot : botController.getBots()) {
+            bot.setShouldMove(true);
+        }
     }
 
     private void registerCommands() {

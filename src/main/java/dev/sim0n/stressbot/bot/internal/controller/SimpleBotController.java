@@ -61,11 +61,6 @@ public class SimpleBotController<Buf extends ByteBuf> implements BotController<B
                 throw new RuntimeException(e);
             }
         }
-
-        // Make sure they're all moving
-        for (Bot bot : repo.getBots()) {
-            bot.setShouldMove(true);
-        }
     }
 
     @Override
