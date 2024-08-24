@@ -27,15 +27,16 @@ Option                       Description
 -H, -h, --help               displays a help menu
 -P, --port <Integer>         the server port
 -U, --username <String>      username prefix
+-MA, --moveafter <Integer>   allow bots to move every x amount of joins
 ```
 
 ## Example Usage
 
 ```
-java -jar stress-bot.jar -A 127.0.0.1 -P 25565 -C 100 -D 50
+java -jar stress-bot.jar -A 127.0.0.1 -P 25565 -C 100 -D 50 -MA 5
 ```
 
-This command will make 100 bots join 127.0.0.1:25565 with a delay of 50 milliseconds.
+This command will make 100 bots join 127.0.0.1:25565 with a delay of 50 milliseconds and make bots move after 5 has joined.
 
 ## TODO
 
