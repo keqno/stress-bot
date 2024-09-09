@@ -1,7 +1,6 @@
 package dev.sim0n.stressbot.command.internal.bot;
 
 import dev.sim0n.stressbot.StressBot;
-import dev.sim0n.stressbot.bot.controller.BotController;
 import dev.sim0n.stressbot.command.Command;
 import dev.sim0n.stressbot.command.Namespace;
 

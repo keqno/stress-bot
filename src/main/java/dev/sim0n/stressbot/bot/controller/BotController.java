@@ -11,9 +11,9 @@ import java.util.function.Consumer;
  * @author sim0n
  */
 public interface BotController<Buf extends ByteBuf> {
-    void start(String address, int port, int botCount, int moveAfter, long loginDelay);
 
     void makeBot(Consumer<ChannelHandlerContext> connectAction, Consumer<ChannelHandlerContext> disconnectAction);
 
     List<Bot> getBots();
+
 }

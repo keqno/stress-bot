@@ -24,6 +24,7 @@ public class TickLoopRunnable implements Runnable {
         while (true) {
             try {
                 long now = System.nanoTime();
+                this.app.tickJoin();
 
                 if (now - this.lastTickTime >= TICK_TIME) {
                     this.app.getBotController().getBots().forEach(Bot::tick);

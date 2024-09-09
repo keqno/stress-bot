@@ -3,7 +3,6 @@ package dev.sim0n.stressbot.bot;
 import lombok.Getter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -11,5 +10,7 @@ import java.util.List;
  */
 @Getter
 public class BotRepository {
-    private final List<Bot> bots = Collections.synchronizedList(new ArrayList<>());
+
+    private final List<Bot> bots = new ArrayList<>();
+
 }

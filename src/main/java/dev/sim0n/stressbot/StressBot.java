@@ -1,6 +1,8 @@
 package dev.sim0n.stressbot;
 
 import dev.sim0n.stressbot.bot.Bot;
+import dev.sim0n.stressbot.bot.action.ConnectAction;
+import dev.sim0n.stressbot.bot.action.DisconnectAction;
 import dev.sim0n.stressbot.bot.controller.BotController;
 import dev.sim0n.stressbot.bot.internal.controller.SimpleBotController;
 import dev.sim0n.stressbot.bot.internal.factory.SimpleBotFactory;
@@ -9,10 +11,12 @@ import dev.sim0n.stressbot.command.internal.bot.BotCommands;
 import dev.sim0n.stressbot.runnable.ConsoleRunnable;
 import dev.sim0n.stressbot.runnable.TickLoopRunnable;
 import dev.sim0n.stressbot.util.PacketBuffer;
+import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.function.Consumer;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -29,7 +33,6 @@ public class StressBot {
     public static StressBot instance;
 
     private final CommandManager commandManager = new CommandManager();
-
     private BotController<PacketBuffer> botController;
 
     private final String address;
@@ -71,10 +74,9 @@ public class StressBot {
         System.out.println();
 
         this.registerBotController();
-        this.registerTickLoop();
         this.registerConsole();
         this.registerCommands();
-        this.registerBots();
+        this.registerTickLoop();
     }
 
     public void registerBotController() {
@@ -85,12 +87,28 @@ public class StressBot {
                 .usernamePrefix(this.usernamePrefix);
     }
 
-    public void registerBots() {
-        this.botController.start(this.address, this.port, this.botCount, this.moveAfter, this.loginDelay);
+    private long delay = 0L;
+    private int i = 0;
 
-        // Make sure they're all moving
-        for (Bot bot : botController.getBots()) {
-            bot.setShouldMove(true);
+    public void tickJoin() {
+        if (i >= botCount) {
+            return;
+        }
+
+        if (System.currentTimeMillis() > delay) {
+            delay = System.currentTimeMillis() + (loginDelay - 1); // - 1 as the tick loop sleeps for 1ms
+            String name = this.usernamePrefix + "_" + i++;
+
+            Consumer<ChannelHandlerContext> connectAction = new ConnectAction(address, port, name);
+            Consumer<ChannelHandlerContext> disconnectAction = new DisconnectAction(name);
+
+            botController.makeBot(connectAction, disconnectAction);
+
+            if (moveAfter == 0 || (moveAfter != -1 && (i + 1) % moveAfter == 0)) {
+                for (Bot repoBot : botController.getBots()) {
+                    repoBot.setShouldMove(true);
+                }
+            }
         }
     }
 
