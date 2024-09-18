@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.List;
+import java.util.Queue;
 import java.util.function.Consumer;
 
 /**
@@ -12,8 +13,10 @@ import java.util.function.Consumer;
  */
 public interface BotController<Buf extends ByteBuf> {
 
-    void makeBot(Consumer<ChannelHandlerContext> connectAction, Consumer<ChannelHandlerContext> disconnectAction);
+    void makeBot(Consumer<ChannelHandlerContext> connectAction, Consumer<ChannelHandlerContext> disconnectAction, int id);
 
     List<Bot> getBots();
+
+    Queue<Bot> getQueuedBots();
 
 }

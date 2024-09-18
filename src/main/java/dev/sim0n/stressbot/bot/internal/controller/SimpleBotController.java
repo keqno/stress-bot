@@ -21,6 +21,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Queue;
 import java.util.function.Consumer;
 
 /**
@@ -38,8 +39,8 @@ public class SimpleBotController<Buf extends ByteBuf> implements BotController<B
     private final String usernamePrefix;
 
     @Override
-    public void makeBot(Consumer<ChannelHandlerContext> connectAction, Consumer<ChannelHandlerContext> disconnectAction) {
-        Bot bot = this.botFactory.makeBot(connectAction, disconnectAction, this.repo);
+    public void makeBot(Consumer<ChannelHandlerContext> connectAction, Consumer<ChannelHandlerContext> disconnectAction, int id) {
+        Bot bot = this.botFactory.makeBot(connectAction, disconnectAction, this.repo, id);
 
         try {
             Bootstrap bootstrap = new Bootstrap();
@@ -60,6 +61,7 @@ public class SimpleBotController<Buf extends ByteBuf> implements BotController<B
                     });
 
             bootstrap.connect(address, port);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -68,6 +70,11 @@ public class SimpleBotController<Buf extends ByteBuf> implements BotController<B
     @Override
     public List<Bot> getBots() {
         return this.repo.getBots();
+    }
+
+    @Override
+    public Queue<Bot> getQueuedBots() {
+        return repo.getQueuedBots();
     }
 
     public static AddAddress builder() {

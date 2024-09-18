@@ -53,6 +53,7 @@ public class PlayerBot implements Bot {
 
     private int positionUpdateTicks;
     private int ticksExisted;
+    private int id;
     private boolean shouldMove;
 
     private double moveSpeed = 0.2;

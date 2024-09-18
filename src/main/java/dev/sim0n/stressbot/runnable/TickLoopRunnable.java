@@ -4,6 +4,8 @@ import dev.sim0n.stressbot.StressBot;
 import dev.sim0n.stressbot.bot.Bot;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Queue;
+
 /**
  * @author sim0n
  * <p>
@@ -24,9 +26,26 @@ public class TickLoopRunnable implements Runnable {
         while (true) {
             try {
                 long now = System.nanoTime();
-                this.app.tickJoin();
 
                 if (now - this.lastTickTime >= TICK_TIME) {
+                    Queue<Bot> queue = app.getBotController().getQueuedBots();
+                    int moveAfter = app.getMoveAfter();
+                    Bot add;
+
+                    while ((add = queue.poll()) != null) {
+                        app.getBotController().getBots().add(add);
+                        int id = add.getId();
+
+                        if (moveAfter == 0) {
+                            add.setShouldMove(true);
+
+                        } else if ((moveAfter > 0 && id > 0 && id % moveAfter == 0) || id - 1 == app.getBotCount()) {
+                            for (Bot bot : app.getBotController().getBots()) {
+                                bot.setShouldMove(true);
+                            }
+                        }
+                    }
+
                     this.app.getBotController().getBots().forEach(Bot::tick);
                     this.lastTickTime = now;
                 }

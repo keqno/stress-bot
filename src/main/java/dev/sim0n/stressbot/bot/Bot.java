@@ -28,4 +28,9 @@ public interface Bot extends Tickable, Connectable, PacketListener {
     double getMoveSpeed();
 
     void toggleTask(String task);
+
+    int getId();
+
+    void setId(int id);
+
 }

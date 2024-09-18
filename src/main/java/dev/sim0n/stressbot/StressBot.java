@@ -1,22 +1,18 @@
 package dev.sim0n.stressbot;
 
-import dev.sim0n.stressbot.bot.Bot;
-import dev.sim0n.stressbot.bot.action.ConnectAction;
-import dev.sim0n.stressbot.bot.action.DisconnectAction;
 import dev.sim0n.stressbot.bot.controller.BotController;
 import dev.sim0n.stressbot.bot.internal.controller.SimpleBotController;
 import dev.sim0n.stressbot.bot.internal.factory.SimpleBotFactory;
 import dev.sim0n.stressbot.command.CommandManager;
 import dev.sim0n.stressbot.command.internal.bot.BotCommands;
 import dev.sim0n.stressbot.runnable.ConsoleRunnable;
+import dev.sim0n.stressbot.runnable.JoinRunnable;
 import dev.sim0n.stressbot.runnable.TickLoopRunnable;
 import dev.sim0n.stressbot.util.PacketBuffer;
-import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.function.Consumer;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -77,6 +73,7 @@ public class StressBot {
         this.registerConsole();
         this.registerCommands();
         this.registerTickLoop();
+        this.startLogins();
     }
 
     public void registerBotController() {
@@ -87,29 +84,9 @@ public class StressBot {
                 .usernamePrefix(this.usernamePrefix);
     }
 
-    private long delay = 0L;
-    private int i = 0;
-
-    public void tickJoin() {
-        if (i >= botCount) {
-            return;
-        }
-
-        if (System.currentTimeMillis() > delay) {
-            delay = System.currentTimeMillis() + (loginDelay - 1); // - 1 as the tick loop sleeps for 1ms
-            String name = this.usernamePrefix + "_" + i++;
-
-            Consumer<ChannelHandlerContext> connectAction = new ConnectAction(address, port, name);
-            Consumer<ChannelHandlerContext> disconnectAction = new DisconnectAction(name);
-
-            botController.makeBot(connectAction, disconnectAction);
-
-            if (moveAfter == 0 || (moveAfter != -1 && (i + 1) % moveAfter == 0)) {
-                for (Bot repoBot : botController.getBots()) {
-                    repoBot.setShouldMove(true);
-                }
-            }
-        }
+    public void startLogins() {
+        Thread thread = new Thread(new JoinRunnable());
+        thread.start();
     }
 
     private void registerCommands() {

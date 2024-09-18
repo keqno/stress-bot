@@ -18,7 +18,7 @@ public enum SimpleBotFactory implements BotFactory<PacketBuffer> {
     private final BotFactory<PacketBuffer> innerBotFactory = new PartitioningBotFactory<>(PlayerBot::new);
 
     @Override
-    public Bot makeBot(Consumer<ChannelHandlerContext> connectAction, Consumer<ChannelHandlerContext> disconnectAction, BotRepository repo) {
-        return this.innerBotFactory.makeBot(connectAction, disconnectAction, repo);
+    public Bot makeBot(Consumer<ChannelHandlerContext> connectAction, Consumer<ChannelHandlerContext> disconnectAction, BotRepository repo, int id) {
+        return this.innerBotFactory.makeBot(connectAction, disconnectAction, repo, id);
     }
 }
