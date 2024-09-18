@@ -39,7 +39,7 @@ public class TickLoopRunnable implements Runnable {
                         if (moveAfter == 0) {
                             add.setShouldMove(true);
 
-                        } else if ((moveAfter > 0 && id > 0 && id % moveAfter == 0) || id - 1 == app.getBotCount()) {
+                        } else if ((moveAfter > 0 && id > 0 && id % moveAfter == 0) || id + 1 == app.getBotCount()) {
                             for (Bot bot : app.getBotController().getBots()) {
                                 bot.setShouldMove(true);
                             }
